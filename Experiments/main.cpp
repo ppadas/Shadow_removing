@@ -17,11 +17,17 @@ void add_to_video(const cv::Mat& image, cv::VideoWriter& video) {
     video << relief_3channels;
 }
 
+void getHeatMapImage(cv::Mat& dst, const cv::Mat& src) {
+    cv::Mat channels[3] = {src, src, src};
+    cv::merge(channels, 3, dst);
+    cv::applyColorMap(dst, dst, cv::COLORMAP_JET);
+}
+
 bool check_converged(cv::Mat& relief, cv::Mat& previous_relief) {
     cv::Mat diff = relief - previous_relief;
     float delta = 0.01;
-    for (int x = 0; x < diff.cols; ++x) { 
-        for (int y = 0; y < diff.rows; ++y) {
+    for (int x = 0; x < diff.rows; ++x) { 
+        for (int y = 0; y < diff.cols; ++y) {
             if (diff.at<float>(x, y) > delta || diff.at<float>(x, y) < -delta) {
                 return false;
             }
@@ -127,7 +133,7 @@ int incre_filling(cv::Mat& dst_image, cv::Mat& src_image, cv::Mat& original_imag
 int main(int argc, char* argv[]) {
     std::string path = argv[1];
     cv::Mat image = cv::imread(path, cv::IMREAD_COLOR);
-    
+
     std::string s = "src.png";
 
     cv::imshow("input", image);
@@ -140,25 +146,21 @@ int main(int argc, char* argv[]) {
     cv::split(image_YCC, channels);
     cv::Mat channel_Y = channels[0];
 
-    cv::imshow("Src_Y", channel_Y);
-    cv::waitKey(0);
+    cv::Mat channel_Y_heatMap;
+    getHeatMapImage(channel_Y_heatMap, channel_Y);
+    cv::imwrite( "Images/1_1_Src_Y.png", channel_Y);
+    cv::imwrite( "Images/1_2_Src_Y.png", channel_Y_heatMap);
 
     cv::Mat dst_Y_image = cv::Mat(channel_Y.cols, channel_Y.rows, CV_8UC1, cv::Scalar(0));
-    waterFilling(dst_Y_image, channel_Y, 2500);
-    cv::imshow("New_Y", dst_Y_image);
-    cv::waitKey(0);
+    waterFilling(dst_Y_image, channel_Y, 1000);
 
-    //cv::Mat color_map;
-    //applyColorMap(dst_Y_image, color_map, cv::COLORMAP_JET);
-    //cv::imshow("New_Y_map", color_map);
-    //cv::waitKey(0);
-    
-    //cv::Mat answer_Y = cv::Mat::zeros(dst_Y_image.size(), dst_Y_image.type());
+    getHeatMapImage(channel_Y_heatMap, dst_Y_image);
+    cv::imwrite( "Images/2_1_New_Y.png", dst_Y_image);
+    cv::imwrite( "Images/2_2_New_Y.png", channel_Y_heatMap);
+
     cv::Mat answer_Y = cv::Mat(channel_Y.cols, channel_Y.rows, CV_8UC1, cv::Scalar(0));
-    incre_filling(answer_Y, dst_Y_image, channel_Y, 10);
-
-    cv::imshow("Answer_Y", answer_Y);
-    cv::waitKey(0);
+    incre_filling(answer_Y, dst_Y_image, channel_Y, 100);
+    cv::imwrite( "Images/3_Answer_Y.png", answer_Y);
 
     cv::Mat output_image_YCC;
     cv::Mat output_image;
@@ -166,9 +168,7 @@ int main(int argc, char* argv[]) {
     cv::merge(channels, 3, output_image_YCC);
 
     cv::cvtColor(output_image_YCC, output_image, cv::COLOR_YCrCb2BGR);
-    cv::imshow("Answer", output_image);
-    cv::waitKey(0);
+    cv::imwrite("Images/4_Color_answer.png", output_image);
 
-    cv::imwrite("shadow_removing.jpg", output_image);
     return 0;
 }
