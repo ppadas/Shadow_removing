@@ -77,7 +77,6 @@ void ShadowRemoving::GetShadowMask (
 
     double treshold = 160; //параметр
     cv::threshold(dst_Y_image, shadowMask, treshold, 255, cv::THRESH_BINARY_INV);
-    LogMain_("2_mask_dst.png", dst_Y_image);
     LogMain_("3_mask_dst.png", shadowMask);
 }
 
