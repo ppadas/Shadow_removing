@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <array>
 
 using namespace cv;
 
@@ -44,45 +45,36 @@ Scalar getMSSIM(const Mat& i1, const Mat& i2) {
     return mssim;
 }
 
-double intersectionOverUnion(const Mat& i1, const Mat& i2) {
-    int intersection_counter = 0;
-    int union_counter = 0;
-    for (int x = 0; x < i1.rows; ++x) {
-        for (int y = 0; y < i1.cols; ++y) {
-            int i1_value = i1.at<int>(x, y);
-            int i2_value = i2.at<int>(x, y);
-            if (i1_value || i2_value) {
-                ++union_counter;
-            }
-            if (i1_value && i2_value) {
-                ++intersection_counter;
-            }
-        }
-    }
-    return 1. * intersection_counter / union_counter;
-}
-
 int main(int argc, char* argv[]) {
     std::string path_to_files = argv[1];
     std::ifstream file(path_to_files);
 
     std::string image_name;
-    std::string mask_name;
     ShadowRemoving s;
     int iter = 0;
-    cv::Mat shadow_mask;
-    double value = 0;
-    while(file >> image_name >> mask_name) {
+    std::array<int, 6> average_rate = {0, 0, 0, 0, 0, 0};
+
+    while(file >> image_name) {
+        std::cout << image_name << "\n";
         cv::Mat image = cv::imread(image_name, cv::IMREAD_COLOR);
-        cv::Mat shadow_mask_true = cv::imread(mask_name, cv::IMREAD_GRAYSCALE);
         std::ostringstream ss;
         ss << global_path << iter << "_";
         s.SetLogMain(ss.str());
-        s.GetShadowMask(shadow_mask, image);
-        value += intersectionOverUnion(shadow_mask_true, shadow_mask);
+        cv::Mat out_image;
+        s.RemoveShadow(out_image, image);
+
+        std::array<int, 6> times = {0, 50, 100, 200, 300, 400};
+        for (int i = 0; i < times.size(); ++i) {
+            cv::Mat current_image;
+            s.RemoveShadow(current_image, image, times[i]);
+            cv::Scalar result = getMSSIM(current_image, out_image);
+            double m1 = std::min(result[0], result[1]);
+            m1 = std::min(m1, result[2]);
+            std::cout << m1 << " ";
+        }
+        std::cout << "\n";
         ++iter;
     }
-    std::cout << "Mean IOU: " << value / iter << "\n";
     
     return 0;
 }
