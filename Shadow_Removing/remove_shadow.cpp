@@ -151,7 +151,7 @@ int ShadowRemoving::WaterFilling_(
             }
         }
         if (CheckConverged_(relief, previous_relief)) {
-            std::cout << time << "\n";
+            //std::cout << time << "\n";
             break;
         }
         //add_to_video(relief, video);
@@ -180,7 +180,7 @@ int ShadowRemoving::IncreFilling_(
     while(1) {
         ++time;
         relief = water_function + ground_height;
-        cv::Mat previous_relief = relief;
+        cv::Mat previous_relief = relief.clone();
         for (int x = 1; x < ground_height.rows - 2; ++x) { 
             for (int y = 1; y < ground_height.cols - 2; ++y) {
                 double delta_water = teta * 
@@ -200,7 +200,7 @@ int ShadowRemoving::IncreFilling_(
            break;
         }
     }
-    std::cout << time << "\n";
+    //std::cout << time << "\n";
     return 0;
 }
 
