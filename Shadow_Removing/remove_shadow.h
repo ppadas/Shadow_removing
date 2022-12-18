@@ -8,7 +8,8 @@ public:
 
     void RemoveShadow (
         cv::Mat& dst_image, 
-        const cv::Mat& src_image);
+        const cv::Mat& src_image, 
+        int max_time = 1000);
 
     void GetShadowMask (
         cv::Mat& shadowMask, 

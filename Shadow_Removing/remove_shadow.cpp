@@ -3,7 +3,8 @@
 
 void ShadowRemoving::RemoveShadow(
     cv::Mat& dst_image, 
-    const cv::Mat& src_image) {
+    const cv::Mat& src_image,
+    int max_time) {
     LogMain_("0_rm_src.png", src_image);
 
     cv::Mat image_YCC;
@@ -21,7 +22,7 @@ void ShadowRemoving::RemoveShadow(
     }
 
     cv::Mat dst_Y_image = cv::Mat(channel_Y.cols, channel_Y.rows, CV_8UC1, cv::Scalar(0));
-    WaterFilling_(dst_Y_image, channel_Y, 1000);
+    WaterFilling_(dst_Y_image, channel_Y, max_time);
 
     if (!log_all_path_.empty()) {
         cv::Mat channel_Y_heatMap;
@@ -42,6 +43,7 @@ void ShadowRemoving::RemoveShadow(
     cv::cvtColor(output_image_YCC, output_image, cv::COLOR_YCrCb2BGR);
 
     LogMain_("4_rm_dst.png", output_image);
+    dst_image = output_image.clone();
 
     return;
 }
@@ -76,7 +78,7 @@ void ShadowRemoving::GetShadowMask (
     }
 
     double treshold = 160; //параметр
-    cv::threshold(dst_Y_image, shadowMask, treshold, 255, cv::THRESH_BINARY_INV);
+    cv::threshold(dst_Y_image, shadowMask, treshold, 255, cv::THRESH_BINARY_INV+cv::THRESH_OTSU);
     LogMain_("3_mask_dst.png", shadowMask);
 }
 
@@ -129,6 +131,7 @@ int ShadowRemoving::WaterFilling_(
     float teta = 0.2;
 
     for (int time = 0; time < max_time; ++time) {
+        cv::Mat previous_relief = relief.clone();
         relief = water_function + ground_height;
         cv::minMaxLoc(relief, NULL, &peak_value);
         
@@ -146,6 +149,10 @@ int ShadowRemoving::WaterFilling_(
                     water_function.at<float>(x, y) = 0;
                 }
             }
+        }
+        if (CheckConverged_(relief, previous_relief)) {
+            std::cout << time << "\n";
+            break;
         }
         //add_to_video(relief, video);
     }
@@ -189,7 +196,7 @@ int ShadowRemoving::IncreFilling_(
         if (CheckConverged_(relief, previous_relief)) {
             break;
         }
-        if (time == 100) {
+        if (time == max_time) {
            break;
         }
     }
