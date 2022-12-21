@@ -5,9 +5,8 @@
 /**
  * @class ShadowRemoving
  * @brief 
- * A class that provides the ability to process images of documents. 
- * Allows you to remove shadows from the document image or get a binary shadow mask 
- * on the document image. 
+ * Класс предоставляет возможность обрабатывать изображения документов.
+ * Можно удалить тень с документа или получить бинарную маску тени. 
  */
 
 class ShadowRemoving {
@@ -15,15 +14,15 @@ public:
     ShadowRemoving() = default;
 
 /**
- * @brief Shadow Removing
+ * @brief
  *
- * Function for removing shadows on a document image.
- * The water filling algorithm is used for implementation.
- * Some inner steps can be logged. 
+ * Функция для удаления тени с изображения документа
+ * В реализации используется алгоритм водоразлива.
+ * Исходное изображение и результат, а также промежуточные шаги могут быть сохранены.
  *
- * @param dst_image Image to save result
- * @param src_image Image to process
- * @param max_time Number of iterations in water filling algorithm
+ * @param dst_image Изображение, куда будет положен результат
+ * @param src_image Изображение для обработки
+ * @param max_time Количество итераций в алгоритме водоразлива
  *
  * @return void
  * 
@@ -36,14 +35,15 @@ public:
         int max_time = 1000);
 
 /**
- * @brief Provides a shadow mask
+ * @brief
  *
- * A function to get a shadow mask on a document image. 
- * The implementation uses a water-filling algorithm and then Otsu binarization on the resulting result.
- * Some inner steps can be logged. 
+ * Функция, предоставляющая маску тени на изображении документа.
+ * В реализации используется алгоритм водоразлива и банаризация Отцу для
+ * полученного после водоразлива изображения.
+ * Исходное изображение и результат, а также промежуточные шаги могут быть сохранены.
  * 
- * @param shadowMask Image to save result
- * @param src_image Image to process
+ * @param shadowMask Изображение, куда будет положен результат
+ * @param src_image Изображение для обработки
  *
  * @return void
  * 
@@ -55,15 +55,17 @@ public:
         const cv::Mat& src_image);
 
 /**
- * @brief Saving source and result
+ * @brief
  *
- * Function to set path to the directiry to save source and result images.
- * It must be called before the processing function is called. 
- * You can call it several times in the code, then the data for different 
- * functions will be written to different places.
- * To stop logging, call the function with an empty string.
+ * Функция выставляет путь, куда будут записаны входное изображение
+ * и выходное.
+ * Ее следует вызывать перед вызовом функции, результат которой вы хотите сохранить.
+ * Функция может быть вызвана в коде несколько раз, при каждом вызове путь, по которому
+ * будут сохраняться картинки, будет меняться и результаты последующих функций 
+ * будут записаны в новом месте.
+ * Чтобы прекратить логирование вызовите функцию с аргументом -- пустой строкой. 
  *
- * @param path Path to the directiry
+ * @param path Путь к директории
  *
  * @return void
  * @see SetLogAll
@@ -71,17 +73,19 @@ public:
     void SetLogMain(const std::string& path);
 
 /**
- * @brief Saving some inner steps in functions
+ * @brief
  *
- * Function to set path to the directiry inner steps images.
- * It must be called before the processing function is called. 
- * You can call it several times in the code, then the data for different 
- * functions will be written to different places.
- * This path is only for inner steps. 
- * To save source and result too you should call SetLogMain.
- * To stop logging, call the function with an empty string.
+ * Функция выставляет путь, куда будут записаны изображения, 
+ * иллюстрирующие промежуточные шаги функции.
+ * Ее следует вызывать перед вызовом функции, шаги которой вы хотите сохранить.
+ * Функция может быть вызвана в коде несколько раз, при каждом вызове путь, по которому
+ * будут сохраняться картинки, будет меняться и шаги последующих функций 
+ * будут записаны в новом месте.
+ * Функция сохраняет только промежуточные шаги, для сохранения исходного изображения 
+ * и результата вызовите также SetLogMain
+ * Чтобы прекратить логирование вызовите функцию с аргументом -- пустой строкой.
  *
- * @param path Path to the directiry
+ * @param path Путь к директории
  *
  * @return void
  * @see SetLogMain
